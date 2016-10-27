@@ -1,19 +1,16 @@
 #!/bin/bash
 
-# Usage: slackpost <token> <channel> <message>
+# Usage: slackpost "<webhook_url>" "<channel>" "<username>" "<message>"
 
-# Enter the name of your slack host here - the thing that appears in your URL:
-# https://slackhost.slack.com/
-slackhost=PUT_YOUR_HOST_HERE
-
-token=$1
-
-if [[ $token == "" ]]
+# ------------
+webhook_url=$1
+if [[ $webhook_url == "" ]]
 then
-        echo "No token specified"
+        echo "No webhook_url specified"
         exit 1
 fi
 
+# ------------
 shift
 channel=$1
 if [[ $channel == "" ]]
@@ -22,6 +19,16 @@ then
         exit 1
 fi
 
+# ------------
+shift
+username=$1
+if [[ $username == "" ]]
+then
+        echo "No username specified"
+        exit 1
+fi
+
+# ------------
 shift
 
 text=$*
@@ -33,6 +40,7 @@ then
 fi
 
 escapedText=$(echo $text | sed 's/"/\"/g' | sed "s/'/\'/g" )
-json="{\"channel\": \"#$channel\", \"text\": \"$escapedText\"}"
 
-curl -s -d "payload=$json" "https://$slackhost.slack.com/services/hooks/incoming-webhook?token=$token"
+json="{\"channel\": \"$channel\", \"username\":\"$username\", \"icon_emoji\":\"raspberry\", \"attachments\":[{\"color\":\"good\" , \"fallback\":\"Crontab event\" \"text\": \"$escapedText\"}]}"
+
+curl -s -d "payload=$json" "$webhook_url"
